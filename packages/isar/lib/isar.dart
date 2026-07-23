@@ -5,6 +5,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:isar/src/common/platform.dart'
+    if (dart.library.js_interop) 'package:isar/src/common/platform_web.dart'
+    as platform;
 import 'package:isar/src/isar_connect_api.dart';
 import 'package:isar/src/native/isar_core.dart'
     if (dart.library.js_interop) 'package:isar/src/web/isar_web.dart';
@@ -12,8 +15,7 @@ import 'package:isar/src/native/isar_link_impl.dart'
     if (dart.library.js_interop) 'package:isar/src/dart_engine/link_impl.dart';
 import 'package:isar/src/native/open.dart'
     if (dart.library.js_interop) 'package:isar/src/web/indexeddb_open.dart';
-import 'package:isar/src/native/split_words.dart'
-    if (dart.library.js_interop) 'package:isar/src/web/split_words.dart';
+import 'package:isar/src/web/split_words.dart';
 import 'package:meta/meta.dart';
 import 'package:meta/meta_meta.dart';
 
@@ -46,4 +48,4 @@ part 'src/schema/schema.dart';
 @protected
 typedef IsarUint8List = Uint8List;
 
-const bool _kIsWeb = identical(0, 0.0);
+const bool _kIsWeb = platform.isWeb;

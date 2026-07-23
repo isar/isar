@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
+import 'package:isar/src/common/isar_link_backend.dart';
 import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/index_key.dart';
@@ -18,7 +19,8 @@ import 'package:isar/src/native/isar_writer_impl.dart';
 import 'package:isar/src/native/query_build.dart';
 import 'package:isar/src/native/txn.dart';
 
-class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
+class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ>
+    implements IsarLinkBackend {
   IsarCollectionImpl({
     required this.isar,
     required this.ptr,
@@ -644,6 +646,84 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         sourceIds.length + targetIds.length,
       );
       await txn.wait();
+    });
+  }
+
+  @override
+  Future<void> updateLinkBackend<T>({
+    required IsarCollection<T> targetCollection,
+    required String linkName,
+    required Id sourceId,
+    required Iterable<T> link,
+    required Iterable<T> unlink,
+    required bool reset,
+  }) {
+    final target = targetCollection as IsarCollectionImpl<T>;
+    final linkList = link.toList();
+    final unlinkList = unlink.toList();
+    final getId = target.schema.getId;
+    return isar.getTxn(true, (Txn txn) {
+      final count = linkList.length + unlinkList.length;
+      final idsPtr = txn.alloc<Int64>(count);
+      final ids = idsPtr.asTypedList(count);
+      for (var i = 0; i < linkList.length; i++) {
+        ids[i] = _requireLinkId(getId, linkList[i]);
+      }
+      for (var i = 0; i < unlinkList.length; i++) {
+        ids[linkList.length + i] = _requireLinkId(getId, unlinkList[i]);
+      }
+      IC.isar_link_update_all(
+        ptr,
+        txn.ptr,
+        schema.link(linkName).id,
+        sourceId,
+        idsPtr,
+        linkList.length,
+        unlinkList.length,
+        reset,
+      );
+      return txn.wait();
+    });
+  }
+
+  Id _requireLinkId<T>(Id Function(T) getId, T object) {
+    final id = getId(object);
+    if (id == Isar.autoIncrement) {
+      throw IsarError(
+        'Object "$object" has no id and can therefore not be linked. '
+        'Make sure to .put() objects before you use them in links.',
+      );
+    }
+    return id;
+  }
+
+  @override
+  void updateLinkBackendSync<T>({
+    required IsarCollection<T> targetCollection,
+    required String linkName,
+    required Id sourceId,
+    required Iterable<T> link,
+    required Iterable<T> unlink,
+    required bool reset,
+  }) {
+    final target = targetCollection as IsarCollectionImpl<T>;
+    final linkId = schema.link(linkName).id;
+    final getId = target.schema.getId;
+    isar.getTxnSync(true, (Txn txn) {
+      if (reset) {
+        nCall(IC.isar_link_unlink_all(ptr, txn.ptr, linkId, sourceId));
+      }
+      for (final object in link) {
+        var id = getId(object);
+        if (id == Isar.autoIncrement) {
+          id = target.putByIndexSyncInternal(txn: txn, object: object);
+        }
+        nCall(IC.isar_link(ptr, txn.ptr, linkId, sourceId, id));
+      }
+      for (final object in unlink) {
+        nCall(
+            IC.isar_link_unlink(ptr, txn.ptr, linkId, sourceId, getId(object)));
+      }
     });
   }
 }

@@ -28,6 +28,8 @@ class Model {
 }
 
 void main() {
+  if (skipIfUnsupported(BackendCapability.filesystem)) return;
+
   group('Compact on launch', () {
     late Isar isar;
     late File file;

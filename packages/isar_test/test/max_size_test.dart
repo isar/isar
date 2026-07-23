@@ -12,6 +12,8 @@ class Model {
 }
 
 void main() {
+  if (skipIfUnsupported(BackendCapability.configuredMaxSize)) return;
+
   group('Max Size', () {
     test('default', () async {
       final isar = await openTempIsar([ModelSchema]);

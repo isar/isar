@@ -86,6 +86,8 @@ class NullableListModel {
 }
 
 void main() {
+  if (skipIfUnsupported(BackendCapability.schemaMigration)) return;
+
   group('Nullable value', () {
     isarTest('scalar', () async {
       final emptyObj = EmptyModel(0);

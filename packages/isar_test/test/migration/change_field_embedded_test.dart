@@ -53,6 +53,8 @@ class Embedded2 {
 }
 
 void main() {
+  if (skipIfUnsupported(BackendCapability.schemaMigration)) return;
+
   isarTest('Change field embedded', () async {
     final isar1 = await openTempIsar([Model1Schema]);
     await isar1.tWriteTxn(() {

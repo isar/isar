@@ -1,7 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:isar/isar.dart';
-import 'package:isar/src/web/isar_reader_impl.dart';
 import 'package:meta/dart2js.dart';
 
 T newObject<T>() => <Object, dynamic>{} as T;

@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/common/isar_common.dart';
+import 'package:isar/src/common/isar_link_backend.dart';
 import 'package:isar/src/web/isar_reader_impl.dart';
 import 'package:isar/src/web/isar_writer_impl.dart';
 
@@ -26,6 +27,13 @@ class DartEngineIsar extends IsarCommon {
       }
       _state[schema.name] = initialState?[schema.name] ?? {};
     }
+    if (initialState != null) {
+      for (final entry in initialState.entries) {
+        if (entry.key.startsWith('@')) {
+          _state[entry.key] = entry.value;
+        }
+      }
+    }
 
     final collections = <Type, IsarCollection<dynamic>>{};
     for (final schema in schemas) {
@@ -40,16 +48,13 @@ class DartEngineIsar extends IsarCommon {
   final offsets = <Type, List<int>>{};
   EngineState _state = {};
   final Future<void> Function(EngineState state)? persist;
-  final void Function()? onClose;
+  final FutureOr<void> Function(bool deleteFromDisk)? onClose;
   Future<void> _writeTail = Future.value();
   final _watchers = <String, StreamController<void>>{};
   final _objectWatchers = <String, StreamController<void>>{};
 
   @override
   String? get directory => null;
-
-  EngineTransaction current(bool write) =>
-      getTxnSync(write, (EngineTransaction transaction) => transaction);
 
   @override
   Future<Transaction> beginTxn(bool write, bool silent) async {
@@ -118,15 +123,31 @@ class DartEngineIsar extends IsarCommon {
   String _linkStore(String collection, String link) =>
       '@link:$collection:$link';
 
+  DartEngineCollection<dynamic> _collection(String name) =>
+      getCollectionByNameInternal(name) as DartEngineCollection<dynamic>;
+
   Set<Id> linkedIds(
     EngineTransaction transaction,
     String collection,
     String link,
     Id sourceId,
   ) {
-    final record =
-        transaction.state[_linkStore(collection, link)]?[sourceId] ?? const {};
-    return record.keys.whereType<Id>().toSet();
+    final source = _collection(collection);
+    final schema = source.schema.link(link);
+    if (!schema.isBacklink) {
+      final record = transaction.state[_linkStore(collection, link)]
+              ?[sourceId] ??
+          const {};
+      return record.keys.whereType<Id>().toSet();
+    }
+    final result = <Id>{};
+    final store =
+        transaction.state[_linkStore(schema.target, schema.linkName!)] ??
+            const {};
+    for (final entry in store.entries) {
+      if (entry.value.containsKey(sourceId)) result.add(entry.key);
+    }
+    return result;
   }
 
   void updateLink(
@@ -138,6 +159,32 @@ class DartEngineIsar extends IsarCommon {
     required Iterable<Id> remove,
     required bool reset,
   }) {
+    final source = _collection(collection);
+    final schema = source.schema.link(link);
+    if (schema.isBacklink) {
+      final store = transaction.state.putIfAbsent(
+        _linkStore(schema.target, schema.linkName!),
+        () => {},
+      );
+      if (reset) {
+        for (final targets in store.values) {
+          targets.remove(sourceId);
+        }
+      }
+      for (final id in remove) {
+        store[id]?.remove(sourceId);
+      }
+      for (final id in add) {
+        store.putIfAbsent(id, () => {})[sourceId] = true;
+      }
+      transaction.changed
+        ..add(collection)
+        ..add(schema.target);
+      transaction.changedObjects
+          .putIfAbsent(collection, () => {})
+          .add(sourceId);
+      return;
+    }
     final store = transaction.state.putIfAbsent(
       _linkStore(collection, link),
       () => {},
@@ -148,9 +195,34 @@ class DartEngineIsar extends IsarCommon {
       targets.remove(id);
     }
     for (final id in add) {
+      if (schema.single) targets.clear();
       targets[id] = true;
     }
     transaction.changed.add(collection);
+    transaction.changedObjects.putIfAbsent(collection, () => {}).add(sourceId);
+  }
+
+  void cleanupLinks(
+    EngineTransaction transaction,
+    String collection,
+    Id id,
+  ) {
+    for (final entry in transaction.state.entries) {
+      if (!entry.key.startsWith('@link:')) continue;
+      final parts = entry.key.split(':');
+      if (parts.length < 3) continue;
+      final sourceCollection = parts[1];
+      final linkName = parts.sublist(2).join(':');
+      if (sourceCollection == collection) {
+        entry.value.remove(id);
+      }
+      final link = _collection(sourceCollection).schema.link(linkName);
+      if (link.target == collection) {
+        for (final targets in entry.value.values) {
+          targets.remove(id);
+        }
+      }
+    }
   }
 
   @override
@@ -183,14 +255,14 @@ class DartEngineIsar extends IsarCommon {
       Future.error(UnsupportedError('The Dart engine has no filesystem.'));
 
   @override
-  bool performClose(bool deleteFromDisk) {
+  Future<bool> performClose(bool deleteFromDisk) async {
     _state.clear();
-    onClose?.call();
+    await onClose?.call(deleteFromDisk);
     for (final watcher in _watchers.values) {
-      watcher.close();
+      await watcher.close();
     }
     for (final watcher in _objectWatchers.values) {
-      watcher.close();
+      await watcher.close();
     }
     return true;
   }
@@ -255,7 +327,8 @@ class EngineTransaction extends Transaction {
   }
 }
 
-class DartEngineCollection<OBJ> extends IsarCollection<OBJ> {
+class DartEngineCollection<OBJ> extends IsarCollection<OBJ>
+    implements IsarLinkBackend {
   DartEngineCollection(this.isar, this.schema);
 
   @override
@@ -385,14 +458,42 @@ class DartEngineCollection<OBJ> extends IsarCollection<OBJ> {
       _indexKeyData(_serialize(object), indexName);
 
   IndexKey _indexKeyData(Map<Object, dynamic> data, String indexName) {
+    final keys = [..._indexKeysData(data, indexName)];
+    if (keys.isEmpty) return const [];
+    keys.sort(_compareKeys);
+    return keys.first;
+  }
+
+  List<IndexKey> _indexKeysData(
+    Map<Object, dynamic> data,
+    String indexName,
+  ) {
     final index = schema.index(indexName);
-    return index.properties.map((property) {
-      var value = _propertyValue(data, property.name);
-      if (value is String && !property.caseSensitive) {
-        value = value.toLowerCase();
+    if (index.properties.length == 1) {
+      final indexProperty = index.properties.first;
+      final property = schema.property(indexProperty.name);
+      final value = _propertyValue(data, indexProperty.name);
+      if (property.type.isList && indexProperty.type != IndexType.hash) {
+        if (value == null) return const [];
+        if (value is! List || value.isEmpty) return const [];
+        return value.map((element) {
+          dynamic normalized = element;
+          if (normalized is String && !indexProperty.caseSensitive) {
+            normalized = normalized.toLowerCase();
+          }
+          return <dynamic>[normalized];
+        }).toList();
       }
-      return value;
-    }).toList();
+    }
+    return [
+      index.properties.map((property) {
+        var value = _propertyValue(data, property.name);
+        if (value is String && !property.caseSensitive) {
+          value = value.toLowerCase();
+        }
+        return value;
+      }).toList(),
+    ];
   }
 
   dynamic _propertyValue(Map<Object, dynamic> data, String propertyName) {
@@ -405,13 +506,29 @@ class DartEngineCollection<OBJ> extends IsarCollection<OBJ> {
     );
   }
 
+  IndexKey? _normalizeIndexKey(String indexName, IndexKey? key) {
+    if (key == null) return null;
+    final properties = schema.index(indexName).properties;
+    return [
+      for (var i = 0; i < key.length; i++)
+        key[i] is String &&
+                i < properties.length &&
+                !properties[i].caseSensitive
+            ? (key[i] as String).toLowerCase()
+            : key[i],
+    ];
+  }
+
   Id? _findByIndex(
     Map<Id, Map<Object, dynamic>> records,
     String indexName,
     IndexKey key,
   ) {
+    final normalizedKey = _normalizeIndexKey(indexName, key)!;
     for (final entry in records.entries) {
-      if (_compareKeys(_indexKeyData(entry.value, indexName), key) == 0) {
+      if (_indexKeysData(entry.value, indexName).any(
+        (candidate) => _compareKeyToBound(candidate, normalizedKey) == 0,
+      )) {
         return entry.key;
       }
     }
@@ -453,6 +570,7 @@ class DartEngineCollection<OBJ> extends IsarCollection<OBJ> {
       if (records.remove(id) != null) {
         count++;
         transaction.changedObjects.putIfAbsent(name, () => {}).add(id);
+        isar.cleanupLinks(transaction, name, id);
       }
     }
     if (count != 0) transaction.changed.add(name);
@@ -486,20 +604,24 @@ class DartEngineCollection<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<void> clear() =>
       isar.getTxn(true, (EngineTransaction transaction) async {
-        transaction.changedObjects
-            .putIfAbsent(name, () => {})
-            .addAll(_records(transaction).keys);
+        final ids = _records(transaction).keys.toList();
+        transaction.changedObjects.putIfAbsent(name, () => {}).addAll(ids);
         _records(transaction).clear();
+        for (final id in ids) {
+          isar.cleanupLinks(transaction, name, id);
+        }
         _setCounter(transaction, 0);
         transaction.changed.add(name);
       });
 
   @override
   void clearSync() => isar.getTxnSync(true, (EngineTransaction transaction) {
-        transaction.changedObjects
-            .putIfAbsent(name, () => {})
-            .addAll(_records(transaction).keys);
+        final ids = _records(transaction).keys.toList();
+        transaction.changedObjects.putIfAbsent(name, () => {}).addAll(ids);
         _records(transaction).clear();
+        for (final id in ids) {
+          isar.cleanupLinks(transaction, name, id);
+        }
         _setCounter(transaction, 0);
         transaction.changed.add(name);
       });
@@ -544,20 +666,167 @@ class DartEngineCollection<OBJ> extends IsarCollection<OBJ> {
       );
 
   @override
-  Future<void> importJson(List<Map<String, dynamic>> json) => Future.error(
-      UnsupportedError('Typed JSON import requires generated objects.'));
+  Future<void> importJson(List<Map<String, dynamic>> json) =>
+      isar.getTxn(true, (EngineTransaction transaction) async {
+        _importJson(transaction, json);
+      });
 
   @override
   void importJsonSync(List<Map<String, dynamic>> json) =>
-      throw UnsupportedError('Typed JSON import requires generated objects.');
+      isar.getTxnSync(true, (EngineTransaction transaction) {
+        _importJson(transaction, json);
+      });
+
+  void _importJson(
+    EngineTransaction transaction,
+    List<Map<String, dynamic>> objects,
+  ) {
+    final records = _records(transaction);
+    for (final object in objects) {
+      var id = object[schema.idName] as int? ?? Isar.autoIncrement;
+      if (id == Isar.autoIncrement) id = _counter(transaction) + 1;
+      if (id > _counter(transaction)) _setCounter(transaction, id);
+      final data = _encodeJsonObject(schema, object);
+      data['@json'] = _deepCopy(object);
+      for (final index
+          in schema.indexes.values.where((index) => index.unique)) {
+        final duplicate = _findByIndex(
+          records,
+          index.name,
+          _indexKeyData(data, index.name),
+        );
+        if (duplicate != null && duplicate != id) {
+          if (index.replace) {
+            records.remove(duplicate);
+          } else {
+            throw IsarUniqueViolationError();
+          }
+        }
+      }
+      records[id] = data;
+      transaction.changed.add(name);
+      transaction.changedObjects.putIfAbsent(name, () => {}).add(id);
+    }
+  }
+
+  Map<Object, dynamic> _encodeJsonObject(
+    Schema<dynamic> objectSchema,
+    Map<String, dynamic> json,
+  ) {
+    final offsets = isar.offsets[objectSchema.type]!;
+    return {
+      for (final property in objectSchema.properties.values)
+        offsets[property.id]:
+            _encodeJsonProperty(property, json[property.name]),
+    };
+  }
+
+  dynamic _encodeJsonProperty(PropertySchema property, dynamic value) {
+    if (value == null) return null;
+    if (property.type == IsarType.object) {
+      final embedded = schema.embeddedSchemas[property.target]!;
+      return _encodeJsonObject(embedded, (value as Map).cast());
+    }
+    if (property.type == IsarType.objectList) {
+      final embedded = schema.embeddedSchemas[property.target]!;
+      return (value as List)
+          .map((item) => item == null
+              ? null
+              : _encodeJsonObject(embedded, (item as Map).cast()))
+          .toList();
+    }
+    if (property.type == IsarType.bool) return value == true ? 1 : 0;
+    if (property.type == IsarType.boolList) {
+      return (value as List)
+          .map((item) => item == null ? null : (item == true ? 1 : 0))
+          .toList();
+    }
+    if (property.type.scalarType == IsarType.dateTime) {
+      dynamic encode(dynamic item) => item == null
+          ? null
+          : item is int
+              ? item
+              : (item is DateTime ? item : DateTime.parse(item as String))
+                  .toUtc()
+                  .microsecondsSinceEpoch;
+      return property.type.isList
+          ? (value as List).map(encode).toList()
+          : encode(value);
+    }
+    if (property.type.scalarType == IsarType.float) {
+      dynamic encode(dynamic item) => item == null
+          ? null
+          : (Float32List(1)..[0] = (item as num).toDouble())[0];
+      return property.type.isList
+          ? (value as List).map(encode).toList()
+          : encode(value);
+    }
+    return _deepCopy(value);
+  }
+
+  Map<String, dynamic> _decodeJsonObject(
+    Schema<dynamic> objectSchema,
+    Map<Object, dynamic> data,
+  ) {
+    final offsets = isar.offsets[objectSchema.type]!;
+    return {
+      for (final property in objectSchema.properties.values)
+        property.name: _decodeJsonProperty(
+          property,
+          data[offsets[property.id]],
+        ),
+    };
+  }
+
+  dynamic _decodeJsonProperty(PropertySchema property, dynamic value) {
+    if (value == null) return null;
+    if (property.type == IsarType.object) {
+      return _decodeJsonObject(
+        schema.embeddedSchemas[property.target]!,
+        value as Map<Object, dynamic>,
+      );
+    }
+    if (property.type == IsarType.objectList) {
+      final embedded = schema.embeddedSchemas[property.target]!;
+      return (value as List)
+          .map((item) => item == null
+              ? null
+              : _decodeJsonObject(
+                  embedded,
+                  item as Map<Object, dynamic>,
+                ))
+          .toList();
+    }
+    if (property.type == IsarType.bool) return value == 1;
+    if (property.type == IsarType.boolList) {
+      return (value as List)
+          .map((item) => item == null ? null : item == 1)
+          .toList();
+    }
+    return _deepCopy(value);
+  }
 
   @override
-  Future<void> importJsonRaw(Uint8List jsonBytes) =>
-      importJson((jsonDecode(utf8.decode(jsonBytes)) as List).cast());
+  Future<void> importJsonRaw(Uint8List jsonBytes) async {
+    try {
+      final decoded = jsonDecode(utf8.decode(jsonBytes));
+      if (decoded is! List) throw const FormatException('Expected a list.');
+      await importJson(decoded.cast());
+    } catch (error) {
+      throw IsarError('Invalid JSON: $error');
+    }
+  }
 
   @override
-  void importJsonRawSync(Uint8List jsonBytes) =>
-      importJsonSync((jsonDecode(utf8.decode(jsonBytes)) as List).cast());
+  void importJsonRawSync(Uint8List jsonBytes) {
+    try {
+      final decoded = jsonDecode(utf8.decode(jsonBytes));
+      if (decoded is! List) throw const FormatException('Expected a list.');
+      importJsonSync(decoded.cast());
+    } catch (error) {
+      throw IsarError('Invalid JSON: $error');
+    }
+  }
 
   @override
   Future<int> getSize({
@@ -572,10 +841,29 @@ class DartEngineCollection<OBJ> extends IsarCollection<OBJ> {
     bool includeLinks = false,
   }) =>
       isar.getTxnSync(false, (EngineTransaction transaction) {
-        return _records(transaction).values.fold(
-              0,
-              (size, value) => size + _estimateValue(value),
-            );
+        final records = _records(transaction);
+        var size = records.values.fold(
+          0,
+          (total, value) => total + _estimateValue(value),
+        );
+        if (includeIndexes) {
+          for (final record in records.values) {
+            for (final index in schema.indexes.values) {
+              size += _indexKeysData(record, index.name).length * 16;
+            }
+          }
+        }
+        if (includeLinks) {
+          for (final link in schema.links.values.where(
+            (link) => !link.isBacklink,
+          )) {
+            for (final id in records.keys) {
+              size +=
+                  isar.linkedIds(transaction, name, link.name, id).length * 16;
+            }
+          }
+        }
+        return size;
       });
 
   @override
@@ -605,12 +893,88 @@ class DartEngineCollection<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
+  Future<void> updateLinkBackend<T>({
+    required IsarCollection<T> targetCollection,
+    required String linkName,
+    required Id sourceId,
+    required Iterable<T> link,
+    required Iterable<T> unlink,
+    required bool reset,
+  }) async {
+    final target = targetCollection as DartEngineCollection<T>;
+    await isar.getTxn(true, (EngineTransaction transaction) async {
+      final add = <Id>[];
+      for (final object in link) {
+        var id = target.schema.getId(object);
+        if (id == Isar.autoIncrement) id = await target.put(object);
+        add.add(id);
+      }
+      isar.updateLink(
+        transaction,
+        name,
+        linkName,
+        sourceId,
+        add: add,
+        remove: unlink.map(target.schema.getId),
+        reset: reset,
+      );
+    });
+  }
+
+  @override
+  void updateLinkBackendSync<T>({
+    required IsarCollection<T> targetCollection,
+    required String linkName,
+    required Id sourceId,
+    required Iterable<T> link,
+    required Iterable<T> unlink,
+    required bool reset,
+  }) {
+    final target = targetCollection as DartEngineCollection<T>;
+    isar.getTxnSync(true, (EngineTransaction transaction) {
+      final add = <Id>[];
+      for (final object in link) {
+        var id = target.schema.getId(object);
+        if (id == Isar.autoIncrement) id = target.putSync(object);
+        add.add(id);
+      }
+      isar.updateLink(
+        transaction,
+        name,
+        linkName,
+        sourceId,
+        add: add,
+        remove: unlink.map(target.schema.getId),
+        reset: reset,
+      );
+    });
+  }
+
+  @override
   Future<void> verifyLink(
     String linkName,
     List<int> sourceIds,
     List<int> targetIds,
   ) =>
-      Future.error(UnsupportedError('Links are not implemented yet.'));
+      isar.getTxn(false, (EngineTransaction transaction) async {
+        if (sourceIds.length != targetIds.length) {
+          throw IsarError('Source and target link ids must have equal length.');
+        }
+        final expected = <String>{
+          for (var i = 0; i < sourceIds.length; i++)
+            '${sourceIds[i]}:${targetIds[i]}',
+        };
+        final actual = <String>{};
+        for (final sourceId in _records(transaction).keys) {
+          for (final targetId
+              in isar.linkedIds(transaction, name, linkName, sourceId)) {
+            actual.add('$sourceId:$targetId');
+          }
+        }
+        if (!_setEquals(actual, expected)) {
+          throw IsarError('Link contents do not match expected ids.');
+        }
+      });
 }
 
 class DartEngineQuery<T, OBJ> extends Query<T> {
@@ -643,7 +1007,9 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
 
   List<_Result<T>> _results(EngineTransaction transaction) {
     final records = collection._records(transaction);
-    var entries = records.entries.where(_matchesWhere).toList();
+    var entries = records.entries
+        .where((entry) => _matchesWhere(entry, transaction))
+        .toList();
     final indexWhere = whereClauses.whereType<IndexWhereClause>().firstOrNull;
     entries.sort((a, b) {
       var result = indexWhere == null
@@ -702,7 +1068,10 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
     return results.toList();
   }
 
-  bool _matchesWhere(MapEntry<Id, Map<Object, dynamic>> entry) {
+  bool _matchesWhere(
+    MapEntry<Id, Map<Object, dynamic>> entry,
+    EngineTransaction transaction,
+  ) {
     if (whereClauses.isEmpty) return true;
     return whereClauses.any((clause) {
       if (clause is IdWhereClause) {
@@ -715,19 +1084,40 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
         );
       }
       if (clause is IndexWhereClause) {
-        final key = collection._indexKeyData(entry.value, clause.indexName);
-        return _keyInRange(
-          key,
-          clause.lower,
-          clause.upper,
-          clause.includeLower,
-          clause.includeUpper,
-        );
+        final index = collection.schema.index(clause.indexName);
+        if (index.properties.length == 1) {
+          final indexProperty = index.properties.first;
+          final property = collection.schema.property(indexProperty.name);
+          final value = collection._propertyValue(
+            entry.value,
+            indexProperty.name,
+          );
+          if (property.type.isList &&
+              indexProperty.type != IndexType.hash &&
+              value == null) {
+            return false;
+          }
+        }
+        return collection
+            ._indexKeysData(entry.value, clause.indexName)
+            .any((key) => _keyInRange(
+                  key,
+                  collection._normalizeIndexKey(
+                    clause.indexName,
+                    clause.lower,
+                  ),
+                  collection._normalizeIndexKey(
+                    clause.indexName,
+                    clause.upper,
+                  ),
+                  clause.includeLower,
+                  clause.includeUpper,
+                ));
       }
       if (clause is LinkWhereClause) {
         return collection.isar
             .linkedIds(
-              collection.isar.current(false),
+              transaction,
               clause.linkCollection,
               clause.linkName,
               clause.id,
@@ -812,8 +1202,11 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
       return raw is List ? raw.any(matches) : matches(raw);
     }
     if (operation is! FilterCondition) return false;
+    final propertyType = operation.property == collection.schema.idName
+        ? IsarType.long
+        : collection.schema.property(operation.property).type;
     final raw = _value(entry, operation.property);
-    return _matchesCondition(raw, operation);
+    return _matchesCondition(raw, operation, propertyType);
   }
 
   bool _matchesEmbedded(
@@ -856,12 +1249,17 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
       collection.isar.offsets[schema.type]![property.id],
       collection.isar.offsets,
     );
-    return _matchesCondition(raw, operation);
+    return _matchesCondition(raw, operation, property.type);
   }
 
-  bool _matchesCondition(dynamic raw, FilterCondition operation) {
+  bool _matchesCondition(
+    dynamic raw,
+    FilterCondition operation,
+    IsarType propertyType,
+  ) {
     if (operation.type == FilterConditionType.listLength) {
-      final length = raw is List ? raw.length : 0;
+      if (raw is! List) return false;
+      final length = raw.length;
       return length >= (operation.value1! as int) &&
           length <= (operation.value2! as int);
     }
@@ -873,15 +1271,29 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
     if (operation.type == FilterConditionType.elementIsNotNull) {
       return raw is List && raw.any((value) => value != null);
     }
+    if (propertyType.isList && raw == null) return false;
     final values = raw is List ? raw : [raw];
-    return values.any((value) => _matchesValue(value, operation));
+    return values.any(
+      (value) => _matchesValue(
+        value,
+        operation,
+        propertyType.scalarType == IsarType.float,
+      ),
+    );
   }
 
-  bool _matchesValue(dynamic value, FilterCondition condition) {
+  bool _matchesValue(
+    dynamic value,
+    FilterCondition condition,
+    bool float32,
+  ) {
     dynamic normalize(dynamic input) {
       if (input is DateTime) return input.toUtc().microsecondsSinceEpoch;
       if (input is String && !condition.caseSensitive)
         return input.toLowerCase();
+      if (float32 && input is double) {
+        return (Float32List(1)..[0] = input)[0];
+      }
       return input;
     }
 
@@ -892,19 +1304,45 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
     switch (condition.type) {
       case FilterConditionType.equalTo:
         if (actual is double && first is double) {
-          return actual.isNaN && first.isNaN ||
+          return actual == first ||
+              actual.isNaN && first.isNaN ||
               (actual - first).abs() <= condition.epsilon;
         }
         return comparison == 0;
       case FilterConditionType.greaterThan:
+        if (actual is double && first is double && condition.epsilon != 0) {
+          final threshold = condition.include1
+              ? first - condition.epsilon
+              : first + condition.epsilon;
+          return condition.include1 ? actual >= threshold : actual > threshold;
+        }
         return condition.include1 ? comparison >= 0 : comparison > 0;
       case FilterConditionType.lessThan:
+        if (actual is double && first is double && condition.epsilon != 0) {
+          final threshold = condition.include1
+              ? first + condition.epsilon
+              : first - condition.epsilon;
+          return condition.include1 ? actual <= threshold : actual < threshold;
+        }
         return condition.include1 ? comparison <= 0 : comparison < 0;
       case FilterConditionType.between:
-        final lower = condition.include1 ? comparison >= 0 : comparison > 0;
-        final upperCompare = _compare(actual, second);
-        return lower &&
-            (condition.include2 ? upperCompare <= 0 : upperCompare < 0);
+        if (actual is double &&
+            first is double &&
+            second is double &&
+            condition.epsilon != 0) {
+          final lower = condition.include1
+              ? actual >= first - condition.epsilon
+              : actual > first + condition.epsilon;
+          final upper = condition.include2
+              ? actual <= second + condition.epsilon
+              : actual < second - condition.epsilon;
+          return lower && upper;
+        } else {
+          final lower = condition.include1 ? comparison >= 0 : comparison > 0;
+          final upperCompare = _compare(actual, second);
+          return lower &&
+              (condition.include2 ? upperCompare <= 0 : upperCompare < 0);
+        }
       case FilterConditionType.startsWith:
         return actual is String && actual.startsWith(first as String);
       case FilterConditionType.endsWith:
@@ -941,11 +1379,21 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
   T? findFirstSync() => findAllSync().firstOrNull;
 
   @override
-  Future<R?> aggregate<R>(AggregationOp op) async => aggregateSync<R>(op);
+  Future<R?> aggregate<R>(AggregationOp op) => collection.isar.getTxn(
+        false,
+        (EngineTransaction transaction) async => _aggregate<R>(
+            _results(transaction).map((result) => result.value), op),
+      );
 
   @override
-  R? aggregateSync<R>(AggregationOp op) {
-    final values = findAllSync();
+  R? aggregateSync<R>(AggregationOp op) => collection.isar.getTxnSync(
+        false,
+        (EngineTransaction transaction) => _aggregate<R>(
+            _results(transaction).map((result) => result.value), op),
+      );
+
+  R? _aggregate<R>(Iterable<T> iterable, AggregationOp op) {
+    final values = iterable.toList();
     if (op == AggregationOp.count) return values.length as R;
     if (op == AggregationOp.isEmpty) return (values.isEmpty ? 1 : 0) as R;
     final nonNull = values.whereType<Object>().toList();
@@ -967,24 +1415,24 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
   }
 
   @override
-  Future<bool> deleteFirst() async => collection.isar.writeTxn(() async {
-        final first = await _firstId();
-        return first != null && await collection.delete(first);
-      });
+  Future<bool> deleteFirst() => collection.isar.getTxn(
+        true,
+        (EngineTransaction transaction) async {
+          final first = _results(transaction).firstOrNull?.id;
+          return first != null &&
+              collection._deleteIds(transaction, [first]) == 1;
+        },
+      );
 
   @override
-  bool deleteFirstSync() => collection.isar.writeTxnSync(() {
-        final first = _firstIdSync();
-        return first != null && collection.deleteSync(first);
-      });
-
-  Future<Id?> _firstId() => collection.isar.getTxn(
-      false,
-      (EngineTransaction transaction) async =>
-          _results(transaction).firstOrNull?.id);
-
-  Id? _firstIdSync() => collection.isar.getTxnSync(false,
-      (EngineTransaction transaction) => _results(transaction).firstOrNull?.id);
+  bool deleteFirstSync() => collection.isar.getTxnSync(
+        true,
+        (EngineTransaction transaction) {
+          final first = _results(transaction).firstOrNull?.id;
+          return first != null &&
+              collection._deleteIds(transaction, [first]) == 1;
+        },
+      );
 
   @override
   Future<int> deleteAll() =>
@@ -1040,10 +1488,15 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
       (EngineTransaction transaction) =>
           collection._records(transaction)[result.id]!,
     );
+    final original = data['@json'];
+    if (original is Map) {
+      final json = Map<String, dynamic>.from(original);
+      json[collection.schema.idName] = result.id;
+      return json;
+    }
     return {
       collection.schema.idName: result.id,
-      for (final property in collection.schema.properties.values)
-        property.name: collection._propertyValue(data, property.name),
+      ...collection._decodeJsonObject(collection.schema, data),
     };
   }
 
@@ -1057,8 +1510,9 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
       false,
       (EngineTransaction transaction) => _results(transaction),
     );
-    return callback(Uint8List.fromList(
-        utf8.encode(jsonEncode(results.map(_json).toList()))));
+    return callback(
+      Uint8List.fromList(utf8.encode(jsonEncode(results.map(_json).toList()))),
+    );
   }
 }
 
@@ -1114,6 +1568,9 @@ int _estimateValue(dynamic value) {
   return utf8.encode(value.toString()).length;
 }
 
+bool _setEquals<T>(Set<T> first, Set<T> second) =>
+    first.length == second.length && first.containsAll(second);
+
 int _compare(dynamic a, dynamic b) {
   if (identical(a, b)) return 0;
   if (a == null) return -1;
@@ -1126,6 +1583,13 @@ int _compare(dynamic a, dynamic b) {
   if (a is DateTime && b is DateTime) return a.compareTo(b);
   if (a is bool && b is bool) return a == b ? 0 : (a ? 1 : -1);
   if (a is String && b is String) return a.compareTo(b);
+  if (a is List && b is List) {
+    for (var i = 0; i < a.length && i < b.length; i++) {
+      final result = _compare(a[i], b[i]);
+      if (result != 0) return result;
+    }
+    return a.length.compareTo(b.length);
+  }
   return a.toString().compareTo(b.toString());
 }
 
@@ -1163,13 +1627,22 @@ bool _keyInRange(
     (lower == null ||
         lower.isEmpty ||
         (includeLower
-            ? _compareKeys(value, lower) >= 0
-            : _compareKeys(value, lower) > 0)) &&
+            ? _compareKeyToBound(value, lower) >= 0
+            : _compareKeyToBound(value, lower) > 0)) &&
     (upper == null ||
         upper.isEmpty ||
         (includeUpper
-            ? _compareKeys(value, upper) <= 0
-            : _compareKeys(value, upper) < 0));
+            ? _compareKeyToBound(value, upper) <= 0
+            : _compareKeyToBound(value, upper) < 0));
+
+int _compareKeyToBound(IndexKey key, IndexKey bound) {
+  for (var i = 0; i < key.length && i < bound.length; i++) {
+    final result = _compare(key[i], bound[i]);
+    if (result != 0) return result;
+  }
+  if (bound.length <= key.length) return 0;
+  return -1;
+}
 
 extension<T> on List<T> {
   T? get firstOrNull => isEmpty ? null : first;

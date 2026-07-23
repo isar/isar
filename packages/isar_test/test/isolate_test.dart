@@ -52,6 +52,8 @@ Future<void> _isolateFunc(SendPort port) async {
 }
 
 void main() {
+  if (skipIfUnsupported(BackendCapability.isolates)) return;
+
   isarTest('Isolate test', () async {
     final isar = await openTempIsar([TestModelSchema], name: 'test');
 

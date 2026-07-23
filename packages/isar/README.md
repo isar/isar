@@ -122,10 +122,19 @@ memory and executes scan-based queries, so avoid making large-database
 performance claims. Browser quota and private-mode restrictions apply.
 Synchronous APIs, inspector, isolates, compact/copy, and multi-tab writers are
 not supported on web. Both JavaScript and WebAssembly builds are supported.
+Records are stored individually in per-collection IndexedDB object stores.
+Commits update records, links, counters, schema metadata, and a monotonic
+revision in one atomic transaction. Adding or removing collections, properties,
+indexes, or links is migrated automatically; changing an existing property's
+type is rejected. A BroadcastChannel lease permits one owner per database name,
+and revision checks reject stale writers.
 
 For disposable databases in tests or tools, import `package:isar/isar_memory.dart`
 and use `IsarMemory.open()` or `IsarMemory.openSync()`. Memory instances load no
-native library, create no files, and discard their state when closed.
+native library, create no files, and discard their state when closed. Disk
+persistence and schema migration, isolates, configured file-size limits, and
+filesystem compact/copy operations are intentionally unavailable for memory
+instances; CRUD, transactions, queries, links, JSON, and watchers are supported.
 
 ### 4. Query the database
 

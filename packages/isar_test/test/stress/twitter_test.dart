@@ -27,6 +27,8 @@ Future<List<Tweet>> downloadTweets(String dir, int index) async {
 }
 
 void main() async {
+  if (skipIfUnsupported(BackendCapability.filesystem)) return;
+
   group(
     'Twitter Stress',
     () {

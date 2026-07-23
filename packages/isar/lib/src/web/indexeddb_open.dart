@@ -8,10 +8,14 @@ import 'package:isar/isar.dart';
 import 'package:isar/src/dart_engine/engine.dart';
 import 'package:web/web.dart';
 
-const _store = 'state';
-const _snapshotKey = 'snapshot';
+const _metaStore = '@meta';
+const _linksStore = '@links';
+const _countersStore = '@counters';
+const _legacyStore = 'state';
 const _schemaKey = 'schema';
 const _revisionKey = 'revision';
+
+String _collectionStore(String name) => 'collection:$name';
 
 Future<Isar> openIsar({
   required List<CollectionSchema<dynamic>> schemas,
@@ -22,44 +26,72 @@ Future<Isar> openIsar({
   CompactCondition? compactOnLaunch,
 }) async {
   final lease = await _acquireLease(name);
-  final database = await _openDatabase(name);
-  final expectedSchema =
-      jsonEncode(schemas.map((schema) => schema.toJson()).toList());
-  final storedSchema = await _read(database, _schemaKey);
-  if (storedSchema != null && storedSchema != expectedSchema) {
-    database.close();
-    lease.close();
-    throw IsarError(
-      'The existing web schema is incompatible. Automatic web schema '
-      'migration is not supported in this beta.',
-    );
-  }
-  final snapshot = await _read(database, _snapshotKey);
-  var revision = int.tryParse(await _read(database, _revisionKey) ?? '') ?? 0;
-  final state = snapshot == null ? null : _decodeState(snapshot);
-  if (storedSchema == null) {
-    await _write(database, {
-      _schemaKey: expectedSchema,
-      _revisionKey: revision.toString(),
-      if (snapshot != null) _snapshotKey: snapshot,
-    });
-  }
-  return DartEngineIsar(
-    name,
-    schemas,
-    initialState: state,
-    persist: (state) async {
-      await _writeRevision(database, revision, {
-        _schemaKey: expectedSchema,
-        _snapshotKey: _encodeState(state),
-      });
+  IDBDatabase? database;
+  var handedOff = false;
+  try {
+    database = await _openDatabase(name, schemas);
+    final expectedSchema =
+        jsonEncode(schemas.map((schema) => schema.toJson()).toList());
+    final storedSchema = await _readString(database, _metaStore, _schemaKey);
+    if (storedSchema != null &&
+        !_schemasCompatible(storedSchema, expectedSchema)) {
+      throw IsarError(
+        'The existing web schema contains an incompatible property change.',
+      );
+    }
+
+    var revision = int.tryParse(
+          await _readString(database, _metaStore, _revisionKey) ?? '',
+        ) ??
+        0;
+    var state = await _readState(database, schemas);
+    if (state == null && database.objectStoreNames.contains(_legacyStore)) {
+      final snapshot = await _readString(database, _legacyStore, 'snapshot');
+      if (snapshot != null) state = _decodeState(snapshot);
+    }
+    state ??= {};
+
+    if (storedSchema == null || storedSchema != expectedSchema) {
+      await _writeState(
+        database,
+        schemas,
+        state,
+        revision,
+        expectedSchema,
+        checkRevision: storedSchema != null,
+      );
       revision++;
-    },
-    onClose: () {
-      database.close();
+    }
+
+    final ownedDatabase = database;
+    handedOff = true;
+    return DartEngineIsar(
+      name,
+      schemas,
+      initialState: state,
+      persist: (nextState) async {
+        await _writeState(
+          ownedDatabase,
+          schemas,
+          nextState,
+          revision,
+          expectedSchema,
+          checkRevision: true,
+        );
+        revision++;
+      },
+      onClose: (deleteFromDisk) async {
+        ownedDatabase.close();
+        lease.close();
+        if (deleteFromDisk) await _deleteDatabase(name);
+      },
+    );
+  } finally {
+    if (!handedOff) {
+      database?.close();
       lease.close();
-    },
-  );
+    }
+  }
 }
 
 Isar openIsarSync({
@@ -73,30 +105,208 @@ Isar openIsarSync({
   throw UnsupportedError('Synchronous Isar.open is not supported on web.');
 }
 
-Future<IDBDatabase> _openDatabase(String name) {
+List<String> _stores(List<CollectionSchema<dynamic>> schemas) => [
+      _metaStore,
+      _linksStore,
+      _countersStore,
+      for (final schema in schemas) _collectionStore(schema.name),
+    ];
+
+Future<IDBDatabase> _openDatabase(
+  String name,
+  List<CollectionSchema<dynamic>> schemas,
+) async {
+  var database = await _openRequest(name, null, schemas);
+  final missing = _stores(schemas)
+      .where((store) => !database.objectStoreNames.contains(store));
+  if (missing.isEmpty) return database;
+  final version = database.version + 1;
+  database.close();
+  database = await _openRequest(name, version, schemas);
+  return database;
+}
+
+Future<IDBDatabase> _openRequest(
+  String name,
+  int? version,
+  List<CollectionSchema<dynamic>> schemas,
+) {
   final completer = Completer<IDBDatabase>();
-  final request = window.indexedDB.open('isar-$name', 1);
+  final request = version == null
+      ? window.indexedDB.open('isar-$name')
+      : window.indexedDB.open('isar-$name', version);
   request.onupgradeneeded = ((Event event) {
     final database = request.result as IDBDatabase;
-    if (!database.objectStoreNames.contains(_store)) {
-      database.createObjectStore(_store);
+    for (final store in _stores(schemas)) {
+      if (!database.objectStoreNames.contains(store)) {
+        database.createObjectStore(store);
+      }
     }
   }).toJS;
   request.onsuccess = ((Event event) {
     final database = request.result as IDBDatabase;
     database.onversionchange = ((Event event) => database.close()).toJS;
-    completer.complete(database);
+    if (!completer.isCompleted) completer.complete(database);
   }).toJS;
   request.onerror = ((Event event) {
-    completer.completeError(
-      IsarError(request.error?.message ?? 'Failed to open IndexedDB.'),
-    );
+    if (!completer.isCompleted) {
+      completer.completeError(
+        IsarError(request.error?.message ?? 'Failed to open IndexedDB.'),
+      );
+    }
   }).toJS;
   request.onblocked = ((Event event) {
-    completer.completeError(
-      IsarError('IndexedDB open was blocked by another tab.'),
-    );
+    if (!completer.isCompleted) {
+      completer.completeError(
+        IsarError('IndexedDB open was blocked by another tab.'),
+      );
+    }
   }).toJS;
+  return completer.future;
+}
+
+Future<EngineState?> _readState(
+  IDBDatabase database,
+  List<CollectionSchema<dynamic>> schemas,
+) async {
+  final state = <String, Map<Id, Map<Object, dynamic>>>{};
+  var found = false;
+  for (final schema in schemas) {
+    final values =
+        await _readAllStrings(database, _collectionStore(schema.name));
+    final records = <Id, Map<Object, dynamic>>{};
+    for (final value in values) {
+      final record = jsonDecode(value) as Map<String, dynamic>;
+      records[record['id'] as int] =
+          _integerKeys(record['data']) as Map<Object, dynamic>;
+    }
+    state[schema.name] = records;
+    found |= records.isNotEmpty;
+  }
+  for (final value in await _readAllStrings(database, _linksStore)) {
+    final record = jsonDecode(value) as Map<String, dynamic>;
+    state.putIfAbsent(
+            record['store'] as String, () => {})[record['id'] as int] =
+        _integerKeys(record['data']) as Map<Object, dynamic>;
+    found = true;
+  }
+  final counters = <Id, Map<Object, dynamic>>{};
+  for (final value in await _readAllStrings(database, _countersStore)) {
+    final record = jsonDecode(value) as Map<String, dynamic>;
+    counters[record['id'] as int] =
+        _integerKeys(record['data']) as Map<Object, dynamic>;
+    found = true;
+  }
+  if (counters.isNotEmpty) state['@counters'] = counters;
+  return found ? state : null;
+}
+
+Future<void> _writeState(
+  IDBDatabase database,
+  List<CollectionSchema<dynamic>> schemas,
+  EngineState state,
+  int expectedRevision,
+  String schemaJson, {
+  required bool checkRevision,
+}) async {
+  final names = _stores(schemas);
+  final transaction = database.transaction(
+    names.map((name) => name.toJS).toList().toJS,
+    'readwrite',
+  );
+  final meta = transaction.objectStore(_metaStore);
+  if (checkRevision) {
+    final result = await _request(meta.get(_revisionKey.toJS));
+    final actual = result == null ? 0 : int.parse((result as JSString).toDart);
+    if (actual != expectedRevision) {
+      transaction.abort();
+      throw IsarError(
+        'IndexedDB revision changed from $expectedRevision to $actual.',
+      );
+    }
+  }
+
+  for (final schema in schemas) {
+    final store = transaction.objectStore(_collectionStore(schema.name));
+    store.clear();
+    for (final record in (state[schema.name] ?? const {}).entries) {
+      store.put(
+        jsonEncode({
+          'id': record.key,
+          'data': _stringifyKeys(record.value),
+        }).toJS,
+        record.key.toString().toJS,
+      );
+    }
+  }
+
+  final links = transaction.objectStore(_linksStore);
+  links.clear();
+  for (final collection in state.entries.where(
+    (entry) => entry.key.startsWith('@link:'),
+  )) {
+    for (final record in collection.value.entries) {
+      links.put(
+        jsonEncode({
+          'store': collection.key,
+          'id': record.key,
+          'data': _stringifyKeys(record.value),
+        }).toJS,
+        '${collection.key}:${record.key}'.toJS,
+      );
+    }
+  }
+
+  final counters = transaction.objectStore(_countersStore);
+  counters.clear();
+  for (final record in (state['@counters'] ?? const {}).entries) {
+    counters.put(
+      jsonEncode({
+        'id': record.key,
+        'data': _stringifyKeys(record.value),
+      }).toJS,
+      record.key.toString().toJS,
+    );
+  }
+  meta.put(schemaJson.toJS, _schemaKey.toJS);
+  meta.put((expectedRevision + 1).toString().toJS, _revisionKey.toJS);
+  await _transaction(transaction);
+}
+
+Future<String?> _readString(
+  IDBDatabase database,
+  String storeName,
+  String key,
+) async {
+  final transaction = database.transaction(storeName.toJS, 'readonly');
+  final result =
+      await _request(transaction.objectStore(storeName).get(key.toJS));
+  return result == null ? null : (result as JSString).toDart;
+}
+
+Future<List<String>> _readAllStrings(
+  IDBDatabase database,
+  String storeName,
+) async {
+  final transaction = database.transaction(storeName.toJS, 'readonly');
+  final result = await _request(transaction.objectStore(storeName).getAll());
+  if (result == null) return const [];
+  return (result as JSArray<JSAny?>)
+      .toDart
+      .map((value) => (value as JSString).toDart)
+      .toList();
+}
+
+Future<void> _deleteDatabase(String name) {
+  final completer = Completer<void>();
+  final request = window.indexedDB.deleteDatabase('isar-$name');
+  request.onsuccess = ((Event event) => completer.complete()).toJS;
+  request.onerror = ((Event event) => completer.completeError(
+        IsarError(request.error?.message ?? 'Failed to delete IndexedDB.'),
+      )).toJS;
+  request.onblocked = ((Event event) => completer.completeError(
+        IsarError('IndexedDB deletion was blocked by another tab.'),
+      )).toJS;
   return completer.future;
 }
 
@@ -133,80 +343,53 @@ Future<BroadcastChannel> _acquireLease(String name) async {
   return channel;
 }
 
-Future<String?> _read(IDBDatabase database, String key) async {
-  final transaction = database.transaction(_store.toJS, 'readonly');
-  final request = transaction.objectStore(_store).get(key.toJS);
-  final result = await _request(request);
-  return result == null ? null : (result as JSString).toDart;
-}
-
-Future<void> _write(IDBDatabase database, Map<String, String> values) async {
-  final transaction = database.transaction(_store.toJS, 'readwrite');
-  final store = transaction.objectStore(_store);
-  for (final entry in values.entries) {
-    store.put(entry.value.toJS, entry.key.toJS);
-  }
-  await _transaction(transaction);
-}
-
-Future<void> _writeRevision(
-  IDBDatabase database,
-  int expectedRevision,
-  Map<String, String> values,
-) async {
-  final transaction = database.transaction(_store.toJS, 'readwrite');
-  final store = transaction.objectStore(_store);
-  final result = await _request(store.get(_revisionKey.toJS));
-  final actualRevision =
-      result == null ? 0 : int.parse((result as JSString).toDart);
-  if (actualRevision != expectedRevision) {
-    transaction.abort();
-    throw IsarError(
-      'IndexedDB revision changed from $expectedRevision to $actualRevision.',
-    );
-  }
-  for (final entry in values.entries) {
-    store.put(entry.value.toJS, entry.key.toJS);
-  }
-  store.put((expectedRevision + 1).toString().toJS, _revisionKey.toJS);
-  await _transaction(transaction);
-}
-
 Future<JSAny?> _request(IDBRequest request) {
   final completer = Completer<JSAny?>();
   request.onsuccess =
       ((Event event) => completer.complete(request.result)).toJS;
-  request.onerror = ((Event event) {
-    completer.completeError(
-      IsarError(request.error?.message ?? 'IndexedDB request failed.'),
-    );
-  }).toJS;
+  request.onerror = ((Event event) => completer.completeError(
+        IsarError(request.error?.message ?? 'IndexedDB request failed.'),
+      )).toJS;
   return completer.future;
 }
 
 Future<void> _transaction(IDBTransaction transaction) {
   final completer = Completer<void>();
   transaction.oncomplete = ((Event event) => completer.complete()).toJS;
-  transaction.onerror = ((Event event) {
-    completer.completeError(
-      IsarError(transaction.error?.message ?? 'IndexedDB transaction failed.'),
-    );
-  }).toJS;
-  transaction.onabort = ((Event event) {
-    completer.completeError(
-      IsarError(transaction.error?.message ?? 'IndexedDB transaction aborted.'),
-    );
-  }).toJS;
+  transaction.onerror = ((Event event) => completer.completeError(
+        IsarError(
+            transaction.error?.message ?? 'IndexedDB transaction failed.'),
+      )).toJS;
+  transaction.onabort = ((Event event) => completer.completeError(
+        IsarError(
+            transaction.error?.message ?? 'IndexedDB transaction aborted.'),
+      )).toJS;
   return completer.future;
 }
 
-String _encodeState(EngineState state) => jsonEncode({
-      for (final collection in state.entries)
-        collection.key: {
-          for (final object in collection.value.entries)
-            object.key.toString(): _stringifyKeys(object.value),
-        },
-    });
+bool _schemasCompatible(String storedSource, String expectedSource) {
+  final stored =
+      (jsonDecode(storedSource) as List).cast<Map<String, dynamic>>();
+  final expected =
+      (jsonDecode(expectedSource) as List).cast<Map<String, dynamic>>();
+  final expectedCollections = {
+    for (final collection in expected) collection['name']: collection,
+  };
+  for (final oldCollection in stored) {
+    final collection = expectedCollections[oldCollection['name']];
+    if (collection == null) continue;
+    final properties = {
+      for (final property in collection['properties'] as List)
+        (property as Map<String, dynamic>)['name']: property,
+    };
+    for (final oldProperty in oldCollection['properties'] as List) {
+      final old = oldProperty as Map<String, dynamic>;
+      final property = properties[old['name']];
+      if (property != null && property['type'] != old['type']) return false;
+    }
+  }
+  return true;
+}
 
 EngineState _decodeState(String source) {
   final decoded = jsonDecode(source) as Map<String, dynamic>;

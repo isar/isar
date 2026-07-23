@@ -181,11 +181,11 @@ abstract class IsarCommon extends Isar {
     await Future.wait(_activeAsyncTxns);
     await super.close();
 
-    return performClose(deleteFromDisk);
+    return await performClose(deleteFromDisk);
   }
 
   /// @nodoc
-  bool performClose(bool deleteFromDisk);
+  FutureOr<bool> performClose(bool deleteFromDisk);
 }
 
 /// @nodoc

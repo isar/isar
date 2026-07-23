@@ -60,8 +60,17 @@ jobs:
       - name: Test memory without native core
         run: dart test test/memory_engine_test.dart
         working-directory: packages/isar
+      - name: Resolve backend conformance tests
+        run: flutter pub get
+        working-directory: packages/isar_test
+      - name: Test full memory backend conformance
+        run: flutter test -j 1 --dart-define=ISAR_TEST_BACKEND=memory
+        working-directory: packages/isar_test
       - name: Test IndexedDB in Chrome
         run: dart test -p chrome test/web_indexeddb_test.dart
+        working-directory: packages/isar
+      - name: Test IndexedDB with WebAssembly
+        run: dart test -p chrome --compiler dart2wasm test/web_indexeddb_test.dart
         working-directory: packages/isar
       - name: Compile JavaScript boundary
         run: dart compile js tool/compile_smoke.dart -o /tmp/isar-smoke.js

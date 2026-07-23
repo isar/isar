@@ -29,6 +29,8 @@ class Model {
 }
 
 void main() {
+  if (skipIfUnsupported(BackendCapability.filesystem)) return;
+
   group('Copy to file', () {
     late Isar isar;
 

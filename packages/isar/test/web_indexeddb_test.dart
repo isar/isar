@@ -2,13 +2,19 @@
 library;
 
 import 'package:isar/isar.dart';
+import 'package:isar/src/web/indexeddb_open.dart' as indexeddb;
 import 'package:test/test.dart';
 
 class WebObject {
-  WebObject(this.value, {this.id = Isar.autoIncrement});
+  WebObject(
+    this.value, {
+    this.id = Isar.autoIncrement,
+    this.count = 0,
+  });
 
   int id;
   String value;
+  int count;
 }
 
 const webObjectSchema = CollectionSchema<WebObject>(
@@ -31,6 +37,27 @@ const webObjectSchema = CollectionSchema<WebObject>(
   version: Isar.version,
 );
 
+const webObjectSchemaV2 = CollectionSchema<WebObject>(
+  id: 930002,
+  name: 'WebObject',
+  idName: 'id',
+  properties: {
+    'value': PropertySchema(id: 0, name: 'value', type: IsarType.string),
+    'count': PropertySchema(id: 1, name: 'count', type: IsarType.long),
+  },
+  indexes: {},
+  links: {},
+  embeddedSchemas: {},
+  estimateSize: _estimateSize,
+  serialize: _serializeV2,
+  deserialize: _deserializeV2,
+  deserializeProp: _deserializePropV2,
+  getId: _getId,
+  getLinks: _getLinks,
+  attach: _attach,
+  version: Isar.version,
+);
+
 int _estimateSize(
   WebObject object,
   List<int> offsets,
@@ -47,6 +74,17 @@ void _serialize(
   writer.writeString(offsets[0], object.value);
 }
 
+void _serializeV2(
+  WebObject object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer
+    ..writeString(offsets[0], object.value)
+    ..writeLong(offsets[1], object.count);
+}
+
 WebObject _deserialize(
   int id,
   IsarReader reader,
@@ -55,6 +93,18 @@ WebObject _deserialize(
 ) =>
     WebObject(reader.readString(offsets[0]), id: id);
 
+WebObject _deserializeV2(
+  int id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) =>
+    WebObject(
+      reader.readString(offsets[0]),
+      id: id,
+      count: reader.readLong(offsets[1]),
+    );
+
 dynamic _deserializeProp(
   IsarReader reader,
   int propertyId,
@@ -62,6 +112,14 @@ dynamic _deserializeProp(
   Map<Type, List<int>> allOffsets,
 ) =>
     reader.readString(offset);
+
+dynamic _deserializePropV2(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) =>
+    propertyId == 0 ? reader.readString(offset) : reader.readLong(offset);
 
 int _getId(WebObject object) => object.id;
 List<IsarLinkBase<dynamic>> _getLinks(WebObject object) => const [];
@@ -95,5 +153,53 @@ void main() {
     );
     expect(await objects.where().count(), 1);
     await isar.close();
+  });
+
+  test('deletes IndexedDB when closing with deleteFromDisk', () async {
+    const name = 'indexeddb-delete-test';
+    var isar = await Isar.open([webObjectSchema], name: name);
+    await isar.writeTxn(
+      () => isar.collection<WebObject>().put(WebObject('temporary')),
+    );
+    await isar.close(deleteFromDisk: true);
+
+    isar = await Isar.open([webObjectSchema], name: name);
+    expect(await isar.collection<WebObject>().count(), 0);
+    await isar.close(deleteFromDisk: true);
+  });
+
+  test('migrates compatible added properties with defaults', () async {
+    const name = 'indexeddb-migration-test';
+    var isar = await Isar.open([webObjectSchema], name: name);
+    await isar.writeTxn(
+      () => isar.collection<WebObject>().put(WebObject('old')),
+    );
+    await isar.close();
+
+    isar = await Isar.open([webObjectSchemaV2], name: name);
+    final object = await isar.collection<WebObject>().where().findFirst();
+    expect(object?.value, 'old');
+    expect(object?.count, 0);
+    await isar.close(deleteFromDisk: true);
+  });
+
+  test('rejects a concurrent direct owner', () async {
+    const name = 'indexeddb-owner-test';
+    final first = await indexeddb.openIsar(
+      schemas: [webObjectSchema],
+      name: name,
+      maxSizeMiB: 256,
+      relaxedDurability: true,
+    );
+    await expectLater(
+      indexeddb.openIsar(
+        schemas: [webObjectSchema],
+        name: name,
+        maxSizeMiB: 256,
+        relaxedDurability: true,
+      ),
+      throwsA(isA<IsarError>()),
+    );
+    await first.close(deleteFromDisk: true);
   });
 }

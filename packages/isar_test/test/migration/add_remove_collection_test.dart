@@ -39,6 +39,8 @@ class Model2 {
 }
 
 void main() {
+  if (skipIfUnsupported(BackendCapability.schemaMigration)) return;
+
   isarTest('Add collection', () async {
     final isar1 = await openTempIsar([Model1Schema]);
     final obj1A = Model1(5, 'col1_a');

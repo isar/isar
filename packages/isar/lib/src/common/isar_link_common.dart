@@ -1,7 +1,8 @@
 import 'package:isar/isar.dart';
 import 'package:isar/src/common/isar_link_base_impl.dart';
-
-const bool _kIsWeb = identical(0, 0.0);
+import 'package:isar/src/common/platform.dart'
+    if (dart.library.js_interop) 'package:isar/src/common/platform_web.dart'
+    as platform;
 
 /// @nodoc
 abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
@@ -16,7 +17,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   OBJ? get value {
-    if (isAttached && !isLoaded && !isChanged && !_kIsWeb) {
+    if (isAttached && !isLoaded && !isChanged && !platform.isWeb) {
       loadSync();
     }
     return _value;

@@ -2,8 +2,9 @@ import 'dart:collection';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/common/isar_link_base_impl.dart';
-
-const bool _kIsWeb = identical(0, 0.0);
+import 'package:isar/src/common/platform.dart'
+    if (dart.library.js_interop) 'package:isar/src/common/platform_web.dart'
+    as platform;
 
 /// @nodoc
 abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
@@ -30,7 +31,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   int countSync() => filter().countSync();
 
   Map<Id, OBJ> get _loadedObjects {
-    if (isAttached && !isLoaded && !_kIsWeb) {
+    if (isAttached && !isLoaded && !platform.isWeb) {
       loadSync();
     }
     return _objects;

@@ -89,6 +89,8 @@ class NoDefaultListModel {
 }
 
 void main() {
+  if (skipIfUnsupported(BackendCapability.schemaMigration)) return;
+
   group('No default value', () {
     isarTest('scalar', () async {
       final emptyObj = EmptyModel(0);

@@ -15,8 +15,28 @@ import 'package:test/test.dart';
 import 'package:test_api/src/backend/invoker.dart';
 
 const kIsWeb = identical(0, 0.0);
-const isMemoryBackend =
-    String.fromEnvironment('ISAR_TEST_BACKEND') == 'memory';
+const isMemoryBackend = String.fromEnvironment('ISAR_TEST_BACKEND') == 'memory';
+
+enum BackendCapability {
+  diskPersistence,
+  schemaMigration,
+  isolates,
+  filesystem,
+  configuredMaxSize,
+}
+
+bool supportsCapability(BackendCapability capability) => !isMemoryBackend;
+
+bool skipIfUnsupported(BackendCapability capability) {
+  if (supportsCapability(capability)) return false;
+  test(
+    'requires ${capability.name}',
+    () {},
+    skip: 'The memory backend intentionally does not support '
+        '${capability.name}.',
+  );
+  return true;
+}
 
 final testErrors = <String>[];
 int testCount = 0;
