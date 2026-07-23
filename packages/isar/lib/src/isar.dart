@@ -87,7 +87,7 @@ abstract class Isar {
   /// Open a new Isar instance.
   static Future<Isar> open(
     List<CollectionSchema<dynamic>> schemas, {
-    required String directory,
+    String? directory,
     String name = defaultName,
     int maxSizeMiB = Isar.defaultMaxSizeMiB,
     bool relaxedDurability = true,
@@ -117,7 +117,7 @@ abstract class Isar {
   /// Open a new Isar instance.
   static Isar openSync(
     List<CollectionSchema<dynamic>> schemas, {
-    required String directory,
+    String? directory,
     String name = defaultName,
     int maxSizeMiB = Isar.defaultMaxSizeMiB,
     bool relaxedDurability = true,

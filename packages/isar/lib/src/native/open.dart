@@ -72,12 +72,17 @@ void _initializeInstance(
 
 Future<Isar> openIsar({
   required List<CollectionSchema<dynamic>> schemas,
-  required String directory,
+  String? directory,
   required String name,
   required int maxSizeMiB,
   required bool relaxedDurability,
   CompactCondition? compactOnLaunch,
 }) async {
+  if (directory == null) {
+    throw IsarError(
+      'A directory is required when opening Isar on native platforms.',
+    );
+  }
   initializeCoreBinary();
   IC.isar_connect_dart_api(NativeApi.postCObject.cast());
 
@@ -118,12 +123,17 @@ Future<Isar> openIsar({
 
 Isar openIsarSync({
   required List<CollectionSchema<dynamic>> schemas,
-  required String directory,
+  String? directory,
   required String name,
   required int maxSizeMiB,
   required bool relaxedDurability,
   CompactCondition? compactOnLaunch,
 }) {
+  if (directory == null) {
+    throw IsarError(
+      'A directory is required when opening Isar on native platforms.',
+    );
+  }
   initializeCoreBinary();
   IC.isar_connect_dart_api(NativeApi.postCObject.cast());
   return using((Arena alloc) {

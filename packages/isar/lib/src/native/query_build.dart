@@ -1009,6 +1009,8 @@ void _buildConditionStringOp({
           ),
         );
         break;
+      default:
+        throw IsarError('Unsupported string condition $conditionType');
     }
   } else {
     throw IsarError('Unsupported type for condition');

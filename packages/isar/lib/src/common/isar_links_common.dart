@@ -7,7 +7,8 @@ const bool _kIsWeb = identical(0, 0.0);
 
 /// @nodoc
 abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
-    with IsarLinks<OBJ>, SetMixin<OBJ> {
+    with SetMixin<OBJ>
+    implements IsarLinks<OBJ> {
   final _objects = <Id, OBJ>{};
 
   /// @nodoc
@@ -21,6 +22,12 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   bool get isChanged => addedObjects.isNotEmpty || removedObjects.isNotEmpty;
+
+  @override
+  Future<int> count() => filter().count();
+
+  @override
+  int countSync() => filter().countSync();
 
   Map<Id, OBJ> get _loadedObjects {
     if (isAttached && !isLoaded && !_kIsWeb) {

@@ -5,7 +5,7 @@ const bool _kIsWeb = identical(0, 0.0);
 
 /// @nodoc
 abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
-    with IsarLink<OBJ> {
+    implements IsarLink<OBJ> {
   OBJ? _value;
 
   @override
