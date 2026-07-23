@@ -116,6 +116,17 @@ final isar = await Isar.open(
 );
 ```
 
+On web, omit `directory`. `Isar.open()` automatically uses IndexedDB and is
+asynchronous. The web backend is currently beta: it hydrates the database into
+memory and executes scan-based queries, so avoid making large-database
+performance claims. Browser quota and private-mode restrictions apply.
+Synchronous APIs, inspector, isolates, compact/copy, and multi-tab writers are
+not supported on web. Both JavaScript and WebAssembly builds are supported.
+
+For disposable databases in tests or tools, import `package:isar/isar_memory.dart`
+and use `IsarMemory.open()` or `IsarMemory.openSync()`. Memory instances load no
+native library, create no files, and discard their state when closed.
+
 ### 4. Query the database
 
 ```dart

@@ -3,7 +3,7 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
   clickup_fading_scroll:
@@ -12,12 +12,13 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_svg: any
-  font_awesome_flutter: any
+  font_awesome_flutter: ^10.1.0
   go_router: ^5.0.0
-  google_fonts: ^3.0.1
+  google_fonts: ^8.2.0
   isar:
     path: ../isar
   vm_service: ^9.0.0
+  web: ^1.1.0
   web_socket_channel: ^2.2.0
 
 dev_dependencies:

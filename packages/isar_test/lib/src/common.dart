@@ -5,8 +5,9 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:isar/isar.dart';
+import 'package:isar/isar_memory.dart';
 import 'package:isar_test/src/init_native.dart'
-    if (dart.library.html) 'package:isar_test/src/init_web.dart';
+    if (dart.library.js_interop) 'package:isar_test/src/init_web.dart';
 import 'package:isar_test/src/sync_async_helper.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -14,6 +15,8 @@ import 'package:test/test.dart';
 import 'package:test_api/src/backend/invoker.dart';
 
 const kIsWeb = identical(0, 0.0);
+const isMemoryBackend =
+    String.fromEnvironment('ISAR_TEST_BACKEND') == 'memory';
 
 final testErrors = <String>[];
 int testCount = 0;
@@ -21,7 +24,9 @@ int testCount = 0;
 var _setUp = false;
 Future<void> _prepareTest() async {
   if (!_setUp) {
-    await init();
+    if (!isMemoryBackend) {
+      await init();
+    }
     _setUp = true;
   }
 }
@@ -44,7 +49,7 @@ void isarTestSync(
   Timeout? timeout,
   bool skip = false,
 }) {
-  if (!kIsWeb) {
+  if (!kIsWeb || isMemoryBackend) {
     _isarTest(name, true, body, timeout: timeout, skip: skip);
   }
 }
@@ -116,19 +121,27 @@ Future<Isar> openTempIsar(
   bool closeAutomatically = true,
 }) async {
   await _prepareTest();
-  if (!kIsWeb && directory == null && testTempPath == null) {
+  if (!kIsWeb &&
+      !isMemoryBackend &&
+      directory == null &&
+      testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
     await Directory(testTempPath!).create(recursive: true);
   }
 
-  final isar = await tOpen(
-    schemas: schemas,
-    name: name ?? getRandomName(),
-    maxSizeMiB: maxSizeMiB,
-    directory: testTempPath ?? '',
-    compactOnLaunch: compactOnLaunch,
-  );
+  final instanceName = name ?? getRandomName();
+  final isar = isMemoryBackend
+      ? syncTest
+          ? IsarMemory.openSync(schemas, name: instanceName)
+          : await IsarMemory.open(schemas, name: instanceName)
+      : await tOpen(
+          schemas: schemas,
+          name: instanceName,
+          maxSizeMiB: maxSizeMiB,
+          directory: directory ?? testTempPath,
+          compactOnLaunch: compactOnLaunch,
+        );
 
   if (Invoker.current != null && closeAutomatically) {
     addTearDown(() async {
@@ -139,6 +152,6 @@ Future<Isar> openTempIsar(
   }
 
   // ignore: invalid_use_of_visible_for_testing_member
-  if (!kIsWeb) await isar.verify();
+  if (!kIsWeb || isMemoryBackend) await isar.verify();
   return isar;
 }

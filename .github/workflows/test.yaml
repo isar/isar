@@ -24,7 +24,6 @@ jobs:
   lint:
     name: Check lints
     runs-on: ubuntu-latest
-    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup Flutter
@@ -46,6 +45,34 @@ jobs:
         working-directory: packages/isar_test
       - name: Lint
         run: flutter analyze
+
+  dart_backends:
+    name: Dart memory and web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ secrets.FLUTTER_VERSION }}
+      - name: Resolve Isar
+        run: dart pub get
+        working-directory: packages/isar
+      - name: Test memory without native core
+        run: dart test test/memory_engine_test.dart
+        working-directory: packages/isar
+      - name: Test IndexedDB in Chrome
+        run: dart test -p chrome test/web_indexeddb_test.dart
+        working-directory: packages/isar
+      - name: Compile JavaScript boundary
+        run: dart compile js tool/compile_smoke.dart -o /tmp/isar-smoke.js
+        working-directory: packages/isar
+      - name: Compile WebAssembly boundary
+        run: dart compile wasm tool/compile_smoke.dart -o /tmp/isar-smoke.wasm
+        working-directory: packages/isar
+      - name: Reject retired web bridge
+        run: |
+          ! rg "dart:(html|indexed_db|js'|js_util)|package:js/|unpkg.com/isar" \
+            packages
 
   test:
     name: Dart Test

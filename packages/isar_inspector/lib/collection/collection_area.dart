@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
 import 'dart:math';
 
 import 'package:clickup_fading_scroll/clickup_fading_scroll.dart';
@@ -16,6 +15,7 @@ import 'package:isar_inspector/connect_client.dart';
 import 'package:isar_inspector/object/isar_object.dart';
 import 'package:isar_inspector/query_builder/query_group.dart';
 import 'package:isar_inspector/util.dart';
+import 'package:web/web.dart' as web;
 
 const objectsPerPage = 20;
 
@@ -292,12 +292,12 @@ class _CollectionAreaState extends State<CollectionArea> {
     final data = await widget.client.exportJson(query);
     try {
       final base64 = base64Encode(utf8.encode(jsonEncode(data)));
-      final anchor =
-          AnchorElement(href: 'data:application/octet-stream;base64,$base64')
-            ..target = 'blank'
-            ..download = '${widget.collection}.json';
+      final anchor = web.HTMLAnchorElement()
+        ..href = 'data:application/octet-stream;base64,$base64'
+        ..target = 'blank'
+        ..download = '${widget.collection}.json';
 
-      document.body!.append(anchor);
+      web.document.body!.append(anchor);
       anchor.click();
       anchor.remove();
     } catch (_) {}

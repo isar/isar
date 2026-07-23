@@ -8,7 +8,7 @@ bool get syncTest => Zone.current[#syncTest] as bool? ?? false;
 
 Future<Isar> tOpen({
   required List<CollectionSchema<dynamic>> schemas,
-  required String directory,
+  String? directory,
   String name = Isar.defaultName,
   int maxSizeMiB = Isar.defaultMaxSizeMiB,
   bool relaxedDurability = true,
