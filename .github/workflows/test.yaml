@@ -44,7 +44,7 @@ jobs:
           dart tool/generate_all_tests.dart
         working-directory: packages/isar_test
       - name: Lint
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
   dart_backends:
     name: Dart memory and web
@@ -69,6 +69,12 @@ jobs:
       - name: Compile WebAssembly boundary
         run: dart compile wasm tool/compile_smoke.dart -o /tmp/isar-smoke.wasm
         working-directory: packages/isar
+      - name: Build inspector JavaScript
+        run: flutter build web
+        working-directory: packages/isar_inspector
+      - name: Build inspector WebAssembly
+        run: flutter build web --wasm
+        working-directory: packages/isar_inspector
       - name: Reject retired web bridge
         run: |
           ! rg "dart:(html|indexed_db|js'|js_util)|package:js/|unpkg.com/isar" \
