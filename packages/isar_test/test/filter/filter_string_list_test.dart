@@ -458,7 +458,7 @@ void main() {
       );
     });
 
-    isarTestVm('.elementMatches() VM', () async {
+    isarTest('.elementMatches()', () async {
       await qEqualSet(
         isar.stringModels.filter().stringsElementMatches('?????????'),
         [obj1, obj2, obj4, obj5],
@@ -505,42 +505,6 @@ void main() {
             .filter()
             .nullableStringsNullableElementMatches('non existing'),
         [],
-      );
-    });
-
-    isarTestWeb('.elementMatches() WEB', () async {
-      expect(
-        await isar.stringModels
-            .filter()
-            .stringsElementMatches('?????????')
-            .tFindAll(),
-        anyOf(throwsUnimplementedError, throwsUnsupportedError),
-      );
-
-      expect(
-        await isar.stringModels
-            .filter()
-            .nullableStringsElementMatches('??????????????????')
-            .tFindAll(),
-        anyOf(throwsUnimplementedError, throwsUnsupportedError),
-      );
-
-      expect(
-        await isar.stringModels
-            .filter()
-            .stringsNullableElementMatches('??????????????????')
-            .tFindAll(),
-        anyOf(throwsUnimplementedError, throwsUnsupportedError),
-      );
-
-      expect(
-        await isar.stringModels
-            .filter()
-            .nullableStringsNullableElementContains(
-              '???????????????????????????',
-            )
-            .tFindAll(),
-        anyOf(throwsUnimplementedError, throwsUnsupportedError),
       );
     });
 

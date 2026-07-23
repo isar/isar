@@ -8,14 +8,25 @@ import 'package:isar/isar.dart';
 import 'package:isar/isar_memory.dart';
 import 'package:isar_test/src/init_native.dart'
     if (dart.library.js_interop) 'package:isar_test/src/init_web.dart';
+import 'package:isar_test/src/platform.dart'
+    if (dart.library.js_interop) 'package:isar_test/src/platform_web.dart'
+    as platform;
 import 'package:isar_test/src/sync_async_helper.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:test_api/src/backend/invoker.dart';
 
-const kIsWeb = identical(0, 0.0);
+const kIsWeb = platform.isWeb;
 const isMemoryBackend = String.fromEnvironment('ISAR_TEST_BACKEND') == 'memory';
+
+enum TestBackend { native, memory, web }
+
+const testBackend = kIsWeb
+    ? TestBackend.web
+    : isMemoryBackend
+        ? TestBackend.memory
+        : TestBackend.native;
 
 enum BackendCapability {
   diskPersistence,
@@ -25,15 +36,28 @@ enum BackendCapability {
   configuredMaxSize,
 }
 
-bool supportsCapability(BackendCapability capability) => !isMemoryBackend;
+bool supportsCapability(BackendCapability capability) {
+  return switch (testBackend) {
+    TestBackend.native => true,
+    TestBackend.memory => false,
+    TestBackend.web => switch (capability) {
+        BackendCapability.diskPersistence ||
+        BackendCapability.schemaMigration =>
+          true,
+        BackendCapability.isolates ||
+        BackendCapability.filesystem ||
+        BackendCapability.configuredMaxSize =>
+          false,
+      },
+  };
+}
 
 bool skipIfUnsupported(BackendCapability capability) {
   if (supportsCapability(capability)) return false;
   test(
     'requires ${capability.name}',
     () {},
-    skip: 'The memory backend intentionally does not support '
-        '${capability.name}.',
+    skip: 'The ${testBackend.name} backend does not support ${capability.name}.',
   );
   return true;
 }

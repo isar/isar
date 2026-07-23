@@ -51,7 +51,7 @@ class IsarReaderImpl implements IsarReader {
   @override
   int readInt(int offset) {
     final value = getProperty<dynamic>(object, offset);
-    return value is int ? value : 0;
+    return value is int ? value : -2147483648;
   }
 
   @tryInline
@@ -65,7 +65,7 @@ class IsarReaderImpl implements IsarReader {
   @override
   double readFloat(int offset) {
     final value = getProperty<dynamic>(object, offset);
-    return value is double ? value : 0;
+    return value is num ? value.toDouble() : double.nan;
   }
 
   @tryInline
@@ -79,7 +79,7 @@ class IsarReaderImpl implements IsarReader {
   @override
   int readLong(int offset) {
     final value = getProperty<dynamic>(object, offset);
-    return value is int ? value : 0;
+    return value is int ? value : Isar.minId;
   }
 
   @tryInline
@@ -93,7 +93,7 @@ class IsarReaderImpl implements IsarReader {
   @override
   double readDouble(int offset) {
     final value = getProperty<dynamic>(object, offset);
-    return value is double ? value : 0;
+    return value is num ? value.toDouble() : double.nan;
   }
 
   @tryInline

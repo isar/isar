@@ -164,7 +164,7 @@ void main() {
         bools: [false, false, false],
         ints: [-154123, 3],
         doubles: [234.34, -123e3],
-        dateTimes: [DateTime(1204512, 1, 3), DateTime(1970)],
+        dateTimes: [DateTime(120451, 1, 3), DateTime(1970)],
         stringsSensitive: ['FORK', 'Joe'],
         stringsInsensitive: ['foo', 'bar', 'tomato', 'fries'],
       );

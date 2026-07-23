@@ -50,6 +50,9 @@ Future<Isar> openIsar({
       if (snapshot != null) state = _decodeState(snapshot);
     }
     state ??= {};
+    if (storedSchema != null && storedSchema != expectedSchema) {
+      state = _migrateState(state, storedSchema, schemas);
+    }
 
     if (storedSchema == null || storedSchema != expectedSchema) {
       await _writeState(
@@ -391,6 +394,98 @@ bool _schemasCompatible(String storedSource, String expectedSource) {
   return true;
 }
 
+EngineState _migrateState(
+  EngineState state,
+  String storedSource,
+  List<CollectionSchema<dynamic>> schemas,
+) {
+  final oldCollections = {
+    for (final collection in (jsonDecode(storedSource) as List))
+      (collection as Map<String, dynamic>)['name'] as String: collection,
+  };
+  final collectionNames = schemas.map((schema) => schema.name).toSet();
+  final validLinkStores = {
+    for (final schema in schemas)
+      for (final link in schema.links.values)
+        if (collectionNames.contains(link.target))
+          '@link:${schema.name}:${link.name}',
+  };
+  return {
+    for (final schema in schemas)
+      schema.name: {
+        for (final record in (state[schema.name] ?? const {}).entries)
+          record.key: _migrateRecord(
+            record.value,
+            oldCollections[schema.name],
+            schema,
+          ),
+      },
+    for (final entry in state.entries)
+      if (entry.key == '@counters' || validLinkStores.contains(entry.key))
+        entry.key: entry.value,
+  };
+}
+
+Map<Object, dynamic> _migrateRecord(
+  Map<Object, dynamic> data,
+  Map<String, dynamic>? oldSchema,
+  Schema<dynamic> schema, {
+  Map<String, Map<String, dynamic>>? oldEmbedded,
+  Map<String, Schema<dynamic>>? newEmbedded,
+}) {
+  if (oldSchema == null) return data;
+  final oldProperties =
+      (oldSchema['properties'] as List).cast<Map<String, dynamic>>();
+  oldEmbedded ??= {
+    for (final embedded in (oldSchema['embeddedSchemas'] as List? ?? const []))
+      (embedded as Map<String, dynamic>)['name'] as String: embedded,
+  };
+  newEmbedded ??=
+      schema is CollectionSchema ? schema.embeddedSchemas : const {};
+  final migrated = <Object, dynamic>{};
+  for (final property in schema.properties.values) {
+    final oldId = oldProperties.indexWhere(
+      (oldProperty) => oldProperty['name'] == property.name,
+    );
+    if (oldId < 0 || !data.containsKey(oldId)) continue;
+    if (oldProperties[oldId]['target'] != property.target) continue;
+    var value = data[oldId];
+    if (property.target != null && value != null) {
+      final target = property.target!;
+      final targetSchema = newEmbedded[target];
+      final oldTarget = oldEmbedded[target];
+      if (targetSchema != null && oldTarget != null) {
+        if (value is List) {
+          value = [
+            for (final element in value)
+              if (element is Map<Object, dynamic>)
+                _migrateRecord(
+                  element,
+                  oldTarget,
+                  targetSchema,
+                  oldEmbedded: oldEmbedded,
+                  newEmbedded: newEmbedded,
+                )
+              else
+                element,
+          ];
+        } else if (value is Map<Object, dynamic>) {
+          value = _migrateRecord(
+            value,
+            oldTarget,
+            targetSchema,
+            oldEmbedded: oldEmbedded,
+            newEmbedded: newEmbedded,
+          );
+        }
+      }
+    }
+    migrated[property.id] = value;
+  }
+  if (data.containsKey('@json')) migrated['@json'] = data['@json'];
+  return migrated;
+}
+
 EngineState _decodeState(String source) {
   final decoded = jsonDecode(source) as Map<String, dynamic>;
   return {
@@ -404,6 +499,15 @@ EngineState _decodeState(String source) {
 }
 
 dynamic _stringifyKeys(dynamic value) {
+  if (value is double && !value.isFinite) {
+    return {
+      '@double': value.isNaN
+          ? 'nan'
+          : value.isNegative
+              ? '-infinity'
+              : 'infinity',
+    };
+  }
   if (value is Map) {
     return {
       for (final entry in value.entries)
@@ -416,6 +520,14 @@ dynamic _stringifyKeys(dynamic value) {
 
 dynamic _integerKeys(dynamic value) {
   if (value is Map<String, dynamic>) {
+    if (value.length == 1 && value['@double'] is String) {
+      return switch (value['@double']) {
+        'nan' => double.nan,
+        '-infinity' => double.negativeInfinity,
+        'infinity' => double.infinity,
+        _ => value,
+      };
+    }
     return <Object, dynamic>{
       for (final entry in value.entries)
         int.tryParse(entry.key) ?? entry.key: _integerKeys(entry.value),

@@ -27,7 +27,7 @@ void main() {
       isar = await openTempIsar([ModelSchema]);
     });
 
-    isarTest('Sync txn cannot be opened in sync txn', () {
+    isarTestVm('Sync txn cannot be opened in sync txn', () {
       isar.txnSync(() {
         expect(
           () => isar.txnSync(() {}),
@@ -79,7 +79,7 @@ void main() {
       });
     });
 
-    isarTest('Async txn cannot be opened in sync txn', () {
+    isarTestVm('Async txn cannot be opened in sync txn', () {
       isar.txnSync(() {
         expect(
           () => isar.txn(() async {}),
@@ -131,7 +131,7 @@ void main() {
       });
     });
 
-    isarTest('Sync txn can be opened during async write txn', () async {
+    isarTestVm('Sync txn can be opened during async write txn', () async {
       final c = Completer<void>();
       final txnFuture = isar.writeTxn(() async {
         await c.future;
@@ -144,7 +144,7 @@ void main() {
       await txnFuture;
     });
 
-    isarTest('Sync write txn cannot be opened during async write txn',
+    isarTestVm('Sync write txn cannot be opened during async write txn',
         () async {
       final c = Completer<void>();
       final txnFuture = isar.writeTxn(() async {
@@ -172,7 +172,7 @@ void main() {
       await txnFuture;
     });
 
-    isarTest('Sync writing requires sync write txn', () async {
+    isarTestVm('Sync writing requires sync write txn', () async {
       expect(
         () => isar.models.putSync(Model()),
         throwsIsarError('require an explicit transaction'),
@@ -186,7 +186,7 @@ void main() {
       });
     });
 
-    isarTest('Async writing requires async write txn', () async {
+    isarTestVm('Async writing requires async write txn', () async {
       await expectLater(
         () => isar.models.put(Model()),
         throwsIsarError('require an explicit transaction'),

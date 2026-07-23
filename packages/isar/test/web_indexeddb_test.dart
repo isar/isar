@@ -202,4 +202,23 @@ void main() {
     );
     await first.close(deleteFromDisk: true);
   });
+
+  test('notifies query watchers after commits', () async {
+    final isar = await Isar.open(
+      [webObjectSchema],
+      name: 'indexeddb-query-watcher-test',
+    );
+    final objects = isar.collection<WebObject>();
+    await isar.writeTxn(objects.clear);
+
+    final changed = objects
+        .where()
+        .watchLazy()
+        .first
+        .timeout(const Duration(seconds: 2));
+    await isar.writeTxn(() => objects.put(WebObject('watched')));
+    await changed;
+
+    await isar.close(deleteFromDisk: true);
+  });
 }
