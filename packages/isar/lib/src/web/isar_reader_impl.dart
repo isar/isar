@@ -1,8 +1,11 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:isar/isar.dart';
-import 'package:js/js_util.dart';
 import 'package:meta/dart2js.dart';
+
+T getProperty<T>(Object object, Object key) {
+  return (object as Map<Object, dynamic>)[key] as T;
+}
 
 const nullNumber = double.negativeInfinity;
 const idName = '_id';

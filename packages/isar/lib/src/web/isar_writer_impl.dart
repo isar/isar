@@ -2,8 +2,13 @@
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/web/isar_reader_impl.dart';
-import 'package:js/js_util.dart';
 import 'package:meta/dart2js.dart';
+
+T newObject<T>() => <Object, dynamic>{} as T;
+
+void setProperty(Object object, Object key, Object? value) {
+  (object as Map<Object, dynamic>)[key] = value;
+}
 
 class IsarWriterImpl implements IsarWriter {
   IsarWriterImpl(this.object);

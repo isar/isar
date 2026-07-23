@@ -201,7 +201,7 @@ String? _readString(IsarReader reader, int offset, bool nullable) {
 }
 
 void _writeString(IsarWriter writer, int offset, dynamic value) {
-  final bytes = value is String ? utf8.encode(value) as Uint8List : null;
+  final bytes = value is String ? utf8.encode(value) : null;
   writer.writeByteList(offset, bytes);
 }
 
