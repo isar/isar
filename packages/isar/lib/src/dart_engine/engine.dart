@@ -644,9 +644,17 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
   List<_Result<T>> _results(EngineTransaction transaction) {
     final records = collection._records(transaction);
     var entries = records.entries.where(_matchesWhere).toList();
-    entries.sort((a, b) => whereSort == Sort.asc
-        ? a.key.compareTo(b.key)
-        : b.key.compareTo(a.key));
+    final indexWhere = whereClauses.whereType<IndexWhereClause>().firstOrNull;
+    entries.sort((a, b) {
+      var result = indexWhere == null
+          ? a.key.compareTo(b.key)
+          : _compareKeys(
+              collection._indexKeyData(a.value, indexWhere.indexName),
+              collection._indexKeyData(b.value, indexWhere.indexName),
+            );
+      if (result == 0) result = a.key.compareTo(b.key);
+      return whereSort == Sort.asc ? result : -result;
+    });
     if (filter != null) {
       entries = entries
           .where((entry) => _matchesFilter(entry, filter!, transaction))
@@ -675,7 +683,11 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
       results = results.where((result) {
         final entry = MapEntry(result.id, records[result.id]!);
         final key = distinctBy.isEmpty
-            ? result.id.toString()
+            ? indexWhere == null
+                ? result.id.toString()
+                : collection
+                    ._indexKeyData(entry.value, indexWhere.indexName)
+                    .toString()
             : distinctBy.map((d) {
                 final value = _value(entry, d.property);
                 return d.caseSensitive != false
@@ -744,11 +756,14 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
         case FilterGroupType.and:
           return values.every((value) => value);
         case FilterGroupType.or:
-          return values.any((value) => value);
+          return values.isEmpty || values.any((value) => value);
         case FilterGroupType.xor:
           return values.where((value) => value).length == 1;
         case FilterGroupType.not:
-          return values.isEmpty || !values.first;
+          return values.isEmpty ||
+              operation.filters.first is FilterGroup &&
+                  (operation.filters.first as FilterGroup).filters.isEmpty ||
+              !values.first;
       }
     }
     if (operation is LinkFilter) {
@@ -787,8 +802,64 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
             );
       });
     }
+    if (operation is ObjectFilter) {
+      final property = collection.schema.property(operation.property);
+      final raw = entry.value[collection._offsets[property.id]];
+      final target = collection.schema.embeddedSchemas[property.target]!;
+      bool matches(dynamic value) =>
+          value is Map<Object, dynamic> &&
+          _matchesEmbedded(target, value, operation.filter);
+      return raw is List ? raw.any(matches) : matches(raw);
+    }
     if (operation is! FilterCondition) return false;
     final raw = _value(entry, operation.property);
+    return _matchesCondition(raw, operation);
+  }
+
+  bool _matchesEmbedded(
+    Schema<dynamic> schema,
+    Map<Object, dynamic> data,
+    FilterOperation operation,
+  ) {
+    if (operation is FilterGroup) {
+      final values = operation.filters
+          .map((child) => _matchesEmbedded(schema, data, child))
+          .toList();
+      switch (operation.type) {
+        case FilterGroupType.and:
+          return values.every((value) => value);
+        case FilterGroupType.or:
+          return values.isEmpty || values.any((value) => value);
+        case FilterGroupType.xor:
+          return values.where((value) => value).length == 1;
+        case FilterGroupType.not:
+          return values.isEmpty ||
+              operation.filters.first is FilterGroup &&
+                  (operation.filters.first as FilterGroup).filters.isEmpty ||
+              !values.first;
+      }
+    }
+    if (operation is ObjectFilter) {
+      final property = schema.property(operation.property);
+      final raw = data[collection.isar.offsets[schema.type]![property.id]];
+      final target = collection.schema.embeddedSchemas[property.target]!;
+      bool matches(dynamic value) =>
+          value is Map<Object, dynamic> &&
+          _matchesEmbedded(target, value, operation.filter);
+      return raw is List ? raw.any(matches) : matches(raw);
+    }
+    if (operation is! FilterCondition) return false;
+    final property = schema.property(operation.property);
+    final raw = schema.deserializeProp(
+      IsarReaderImpl(data),
+      property.id,
+      collection.isar.offsets[schema.type]![property.id],
+      collection.isar.offsets,
+    );
+    return _matchesCondition(raw, operation);
+  }
+
+  bool _matchesCondition(dynamic raw, FilterCondition operation) {
     if (operation.type == FilterConditionType.listLength) {
       final length = raw is List ? raw.length : 0;
       return length >= (operation.value1! as int) &&
@@ -878,7 +949,13 @@ class DartEngineQuery<T, OBJ> extends Query<T> {
     if (op == AggregationOp.count) return values.length as R;
     if (op == AggregationOp.isEmpty) return (values.isEmpty ? 1 : 0) as R;
     final nonNull = values.whereType<Object>().toList();
-    if (nonNull.isEmpty) return null;
+    if (nonNull.isEmpty) {
+      if (op == AggregationOp.sum) {
+        return (R == int ? 0 : 0.0) as R;
+      }
+      if (op == AggregationOp.average) return double.nan as R;
+      return null;
+    }
     if (op == AggregationOp.min || op == AggregationOp.max) {
       nonNull.sort(_compare);
       return (op == AggregationOp.min ? nonNull.first : nonNull.last) as R;
@@ -1084,10 +1161,12 @@ bool _keyInRange(
   bool includeUpper,
 ) =>
     (lower == null ||
+        lower.isEmpty ||
         (includeLower
             ? _compareKeys(value, lower) >= 0
             : _compareKeys(value, lower) > 0)) &&
     (upper == null ||
+        upper.isEmpty ||
         (includeUpper
             ? _compareKeys(value, upper) <= 0
             : _compareKeys(value, upper) < 0));

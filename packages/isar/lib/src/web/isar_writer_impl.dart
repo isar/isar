@@ -22,7 +22,7 @@ class IsarWriterImpl implements IsarWriter {
         ? 1
         : value == false
             ? 0
-            : nullNumber;
+            : null;
     setProperty(object, offset, number);
   }
 
@@ -35,25 +35,25 @@ class IsarWriterImpl implements IsarWriter {
   @tryInline
   @override
   void writeInt(int offset, int? value) {
-    setProperty(object, offset, value ?? nullNumber);
+    setProperty(object, offset, value);
   }
 
   @tryInline
   @override
   void writeFloat(int offset, double? value) {
-    setProperty(object, offset, value ?? nullNumber);
+    setProperty(object, offset, value);
   }
 
   @tryInline
   @override
   void writeLong(int offset, int? value) {
-    setProperty(object, offset, value ?? nullNumber);
+    setProperty(object, offset, value);
   }
 
   @tryInline
   @override
   void writeDouble(int offset, double? value) {
-    setProperty(object, offset, value ?? nullNumber);
+    setProperty(object, offset, value);
   }
 
   @tryInline
@@ -62,14 +62,14 @@ class IsarWriterImpl implements IsarWriter {
     setProperty(
       object,
       offset,
-      value?.toUtc().millisecondsSinceEpoch ?? nullNumber,
+      value?.toUtc().microsecondsSinceEpoch,
     );
   }
 
   @tryInline
   @override
   void writeString(int offset, String? value) {
-    setProperty(object, offset, value ?? nullNumber);
+    setProperty(object, offset, value);
   }
 
   @tryInline
@@ -91,7 +91,7 @@ class IsarWriterImpl implements IsarWriter {
   @tryInline
   @override
   void writeByteList(int offset, List<int>? values) {
-    setProperty(object, offset, values ?? nullNumber);
+    setProperty(object, offset, values);
   }
 
   @tryInline
@@ -103,54 +103,52 @@ class IsarWriterImpl implements IsarWriter {
               ? 0
               : e == true
                   ? 1
-                  : nullNumber,
+                  : null,
         )
         .toList();
-    setProperty(object, offset, list ?? nullNumber);
+    setProperty(object, offset, list);
   }
 
   @tryInline
   @override
   void writeIntList(int offset, List<int?>? values) {
-    final list = values?.map((e) => e ?? nullNumber).toList();
-    setProperty(object, offset, list ?? nullNumber);
+    final list = values?.toList();
+    setProperty(object, offset, list);
   }
 
   @tryInline
   @override
   void writeFloatList(int offset, List<double?>? values) {
-    final list = values?.map((e) => e ?? nullNumber).toList();
-    setProperty(object, offset, list ?? nullNumber);
+    final list = values?.toList();
+    setProperty(object, offset, list);
   }
 
   @tryInline
   @override
   void writeLongList(int offset, List<int?>? values) {
-    final list = values?.map((e) => e ?? nullNumber).toList();
-    setProperty(object, offset, list ?? nullNumber);
+    final list = values?.toList();
+    setProperty(object, offset, list);
   }
 
   @tryInline
   @override
   void writeDoubleList(int offset, List<double?>? values) {
-    final list = values?.map((e) => e ?? nullNumber).toList();
-    setProperty(object, offset, list ?? nullNumber);
+    final list = values?.toList();
+    setProperty(object, offset, list);
   }
 
   @tryInline
   @override
   void writeDateTimeList(int offset, List<DateTime?>? values) {
-    final list = values
-        ?.map((e) => e?.toUtc().millisecondsSinceEpoch ?? nullNumber)
-        .toList();
-    setProperty(object, offset, list ?? nullNumber);
+    final list = values?.map((e) => e?.toUtc().microsecondsSinceEpoch).toList();
+    setProperty(object, offset, list);
   }
 
   @tryInline
   @override
   void writeStringList(int offset, List<String?>? values) {
-    final list = values?.map((e) => e ?? nullNumber).toList();
-    setProperty(object, offset, list ?? nullNumber);
+    final list = values?.toList();
+    setProperty(object, offset, list);
   }
 
   @tryInline
